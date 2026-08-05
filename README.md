@@ -37,7 +37,7 @@ Only needed if you're hacking on the CLI itself:
 git clone git@github.com:vibe-ad/vibe-cli.git
 cd vibe-cli
 bun install
-bun run fetch-openapi    # requires AWS creds
+bun run fetch-openapi    # pulls the spec from the public CDN
 bun run gen-client
 bun run build            # compiles dist/vibeco-<platform>-<arch>
 ./dist/vibeco-darwin-arm64 --help
