@@ -1,0 +1,106 @@
+name: release
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch: {}
+
+concurrency:
+  group: release-staging
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ROLE_ARN: ${{ vars.AWS_OPENAPI_FETCH_ROLE_ARN }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # Full history + tags so git-cliff can diff against the previous tag.
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Fetch OpenAPI spec
+        run: bun run fetch-openapi
+
+      - name: Generate client
+        run: bun run gen-client
+
+      - name: Compute VIBECO_VERSION
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          API_REVISION=$(jq -r .latest openapi/manifest.json)
+          if [ -z "$API_REVISION" ] || [ "$API_REVISION" = "null" ]; then
+            echo "openapi/manifest.json has no 'latest' field" >&2
+            exit 1
+          fi
+          NEXT=$(
+            gh release list --json tagName --limit 200 \
+              | jq -r --arg prefix "v${API_REVISION}-" '
+                  [.[] | .tagName
+                    | select(startswith($prefix))
+                    | ltrimstr($prefix)
+                    | select(test("^[0-9]+$"))
+                    | tonumber
+                  ] | (max // 0) + 1'
+          )
+          VERSION="${API_REVISION}-${NEXT}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Publishing v${VERSION}"
+
+      - name: Build all targets
+        env:
+          VIBECO_VERSION: ${{ steps.version.outputs.version }}
+        run: bun run build all
+
+      - name: Compute SHA256SUMS
+        working-directory: dist
+        run: sha256sum vibeco-* > SHA256SUMS
+
+      - name: Generate release notes
+        id: git-cliff
+        uses: orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
+        with:
+          config: cliff.toml
+          # --tag labels the unreleased commits with the upcoming version without
+          # the tag needing to exist yet; --strip all leaves just the grouped body.
+          args: --unreleased --tag ${{ steps.version.outputs.tag }} --strip all
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes-file "${{ steps.git-cliff.outputs.changelog }}" \
+            --latest \
+            dist/vibeco-darwin-arm64 \
+            dist/vibeco-darwin-x64 \
+            dist/vibeco-linux-arm64 \
+            dist/vibeco-linux-x64 \
+            dist/SHA256SUMS

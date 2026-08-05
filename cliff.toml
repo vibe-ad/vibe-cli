@@ -1,0 +1,36 @@
+# git-cliff configuration — generates the grouped GitHub Release body in CI.
+# Invoked from .github/workflows/release.yml with `--unreleased --tag <version> --strip all`,
+# so the header/footer below are stripped at call time and only the grouped body ships.
+
+[changelog]
+header = ""
+body = """
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | upper_first }}
+{% for commit in commits %}
+- {{ commit.message | upper_first }}
+{% endfor %}
+{% endfor %}
+"""
+footer = ""
+trim = true
+
+[git]
+conventional_commits = true
+# Keep non-conforming legacy commits; the catch-all parser buckets them into "Other".
+filter_unconventional = false
+split_commits = false
+protect_breaking_commits = false
+filter_commits = false
+# Match this repo's date-based tags, e.g. v2026-06-01-4 (not semver).
+tag_pattern = "v[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]+"
+sort_commits = "oldest"
+commit_parsers = [
+  { message = "^feat", group = "Features" },
+  { message = "^fix", group = "Bug Fixes" },
+  { message = "^perf", group = "Performance" },
+  { message = "^refactor", group = "Refactor" },
+  { message = "^docs", group = "Documentation" },
+  { message = "^chore|^ci|^build|^test|^style", skip = true },
+  { message = ".*", group = "Other" },
+]

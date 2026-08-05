@@ -1,0 +1,30 @@
+node_modules
+dist
+coverage
+
+# Local env overrides — read at runtime for `--env local`, never shipped
+.env
+.env.local
+.env.*.local
+
+# Local credentials (the real ones live in ~/.config/vibeco; this is belt-and-braces)
+credentials.json
+*.pem
+
+# Editor / OS
+.DS_Store
+.vscode
+.idea
+*.swp
+
+# Internal planning notes — never publish
+PROJECT.md
+
+# Bun compile scratch files (left behind by aborted `bun build --compile`)
+.*.bun-build
+
+# Vendored OpenAPI spec + generated client output — not committed, to keep PR
+# diffs small. Regenerated on demand via `bun run fetch-openapi` and
+# `bun run gen-client`.
+openapi/**/*.yaml
+src/generated/
