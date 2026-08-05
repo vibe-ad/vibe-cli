@@ -1,0 +1,4 @@
+# Default owners — any change to the CLI requires review from the
+# integration team. Tightened further before the repo is flipped public
+# (e.g. branch protection requiring a CODEOWNERS review).
+* @vibe-ad/integration-team
