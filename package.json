@@ -1,0 +1,41 @@
+{
+  "name": "vibe-cli",
+  "version": "0.0.0-dev",
+  "description": "Command-line interface for the Vibe Public API. Auto-generated from the OpenAPI spec.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibe-ad/vibe-cli.git"
+  },
+  "homepage": "https://github.com/vibe-ad/vibe-cli#readme",
+  "bugs": {
+    "url": "https://github.com/vibe-ad/vibe-cli/issues"
+  },
+  "scripts": {
+    "build": "bun run scripts/build.ts",
+    "dev": "bun run src/main.ts",
+    "fetch-openapi": "bun run scripts/fetch-openapi.ts",
+    "gen-client": "bun run scripts/gen-client.ts",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "bun-types": "latest",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^9.1.0",
+    "openapi-typescript": "^7.5.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0",
+    "yaml": "^2.6.0"
+  }
+}
