@@ -2,20 +2,15 @@ name: release
 
 on:
   push:
-    branches: [staging]
+    branches: [main]
   workflow_dispatch: {}
 
 concurrency:
-  group: release-staging
+  group: release-main
   cancel-in-progress: false
 
 permissions:
   contents: write
-  id-token: write
-
-env:
-  AWS_REGION: us-east-1
-  AWS_ROLE_ARN: ${{ vars.AWS_OPENAPI_FETCH_ROLE_ARN }}
 
 jobs:
   release:
@@ -32,12 +27,6 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
-        with:
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
 
       - name: Fetch OpenAPI spec
         run: bun run fetch-openapi
