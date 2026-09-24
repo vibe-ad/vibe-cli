@@ -35,7 +35,7 @@ describe('buildAuthorizeUrl', () => {
     const scope = url.searchParams.get('scope');
     expect(scope).not.toBeNull();
     expect(scope!.split(' ')).toContain('campaigns:read');
-    expect(scope!.split(' ')).not.toContain('offline_access');
+    expect(scope!.split(' ')).toContain('offline_access');
     expect(url.searchParams.get('state')).toBe('abc');
     expect(url.searchParams.get('code_challenge')).toBe('xyz');
     expect(url.searchParams.get('code_challenge_method')).toBe('S256');
