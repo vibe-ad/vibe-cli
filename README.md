@@ -107,6 +107,7 @@ revision (recorded in [`openapi/manifest.json`](./openapi/manifest.json)) and
 generates a runtime registry under `src/generated/`.
 
 [vibe-api]: https://developers.vibe.co
+
 Contact: team-integration@vibe.co
 
 ## License

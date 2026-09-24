@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 
-import { promptYesNo } from '@/updater/prompt';
+import { promptYesNo } from '@/prompt';
 
 describe('promptYesNo', () => {
   it('returns defaultYes when not a TTY (script-safe)', async () => {
