@@ -25,6 +25,7 @@ export const OAUTH_SCOPES: readonly string[] = [
   'impression_tracking:write',
   'reporting:read',
   'openid',
+  'offline_access',
 ];
 
 export interface CliEnvConfig {
