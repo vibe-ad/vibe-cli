@@ -1,4 +1,4 @@
-import { OAUTH_SCOPES, type CliEnvConfig } from '@/config';
+import type { CliEnvConfig } from '@/config';
 
 /**
  * Thin client for the subset of OAuth2 endpoints the CLI needs:
@@ -19,6 +19,7 @@ export interface AuthorizeUrlParams {
   state: string;
   codeChallenge: string;
   codeChallengeMethod: 'S256';
+  scopes: readonly string[];
 }
 
 export function buildAuthorizeUrl(config: CliEnvConfig, params: AuthorizeUrlParams): string {
@@ -26,8 +27,8 @@ export function buildAuthorizeUrl(config: CliEnvConfig, params: AuthorizeUrlPara
   url.searchParams.set('response_type', 'code');
   url.searchParams.set('client_id', config.oauthClientId);
   url.searchParams.set('redirect_uri', params.redirectUri);
-  if (OAUTH_SCOPES.length > 0) {
-    url.searchParams.set('scope', OAUTH_SCOPES.join(' '));
+  if (params.scopes.length > 0) {
+    url.searchParams.set('scope', params.scopes.join(' '));
   }
   url.searchParams.set('state', params.state);
   url.searchParams.set('code_challenge', params.codeChallenge);

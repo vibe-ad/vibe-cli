@@ -13,7 +13,7 @@ import { EXIT, writeError } from '@/output';
 import { runSplash, shouldShowSplash } from '@/splash/splash';
 import { checkForUpdate } from '@/updater/check';
 import { performUpdate } from '@/updater/install';
-import { promptYesNo } from '@/updater/prompt';
+import { promptYesNo } from '@/prompt';
 import { CLI_VERSION } from '@/version';
 
 const VERSION = `${CLI_VERSION} (api=${LATEST_REVISION})`;
@@ -119,9 +119,10 @@ export function buildProgram(): Command {
   program
     .command('login')
     .description('Authenticate against Vibe (OAuth 2.0 + PKCE, opens browser).')
-    .action(async () => {
+    .option('--admin', 'Also request admin-only scopes (requires an organization admin role).')
+    .action(async (cmdOpts: { admin?: boolean }) => {
       const opts = program.opts<GlobalOpts>();
-      await withExit(() => runLogin(envFromOpts(opts)));
+      await withExit(() => runLogin(envFromOpts(opts), { admin: cmdOpts.admin }));
     });
 
   program

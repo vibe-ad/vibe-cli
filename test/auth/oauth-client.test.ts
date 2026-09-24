@@ -26,16 +26,14 @@ describe('buildAuthorizeUrl', () => {
         state: 'abc',
         codeChallenge: 'xyz',
         codeChallengeMethod: 'S256',
+        scopes: ['campaigns:read', 'offline_access'],
       }),
     );
     expect(url.origin + url.pathname).toBe('https://auth.local.vibe.test/oauth2/auth');
     expect(url.searchParams.get('response_type')).toBe('code');
     expect(url.searchParams.get('client_id')).toBe('vibe-cli');
     expect(url.searchParams.get('redirect_uri')).toBe('http://127.0.0.1:51234/callback');
-    const scope = url.searchParams.get('scope');
-    expect(scope).not.toBeNull();
-    expect(scope!.split(' ')).toContain('campaigns:read');
-    expect(scope!.split(' ')).toContain('offline_access');
+    expect(url.searchParams.get('scope')).toBe('campaigns:read offline_access');
     expect(url.searchParams.get('state')).toBe('abc');
     expect(url.searchParams.get('code_challenge')).toBe('xyz');
     expect(url.searchParams.get('code_challenge_method')).toBe('S256');
