@@ -1,6 +1,6 @@
 import open from 'open';
 
-import type { CliEnvConfig } from '@/config';
+import { resolveOAuthScopes, type CliEnvConfig } from '@/config';
 import { buildAuthorizeUrl, exchangeCodeForToken, refreshAccessToken } from '@/auth/oauth-client';
 import { startLoopback } from '@/auth/loopback';
 import { createPkcePair, generateState } from '@/auth/pkce';
@@ -37,6 +37,8 @@ function toStored(
 }
 
 export interface LoginOptions {
+  /** Also request the admin-only scopes (see `ADMIN_OAUTH_SCOPES`). */
+  admin?: boolean;
   /** Override the browser-open behaviour (used by tests). */
   openBrowser?: (url: string) => Promise<void> | void;
   /** Override loopback timeout for tests. */
@@ -57,6 +59,7 @@ export async function login(
       state,
       codeChallenge: pkce.codeChallenge,
       codeChallengeMethod: pkce.codeChallengeMethod,
+      scopes: resolveOAuthScopes({ admin: options.admin ?? false }),
     });
 
     const opener = options.openBrowser ?? ((url) => open(url).then(() => undefined));

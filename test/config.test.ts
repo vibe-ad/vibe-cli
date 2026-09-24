@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
-import { parseEnvName, resolveConfig } from '@/config';
+import { ADMIN_OAUTH_SCOPES, parseEnvName, resolveConfig, resolveOAuthScopes } from '@/config';
 
 describe('resolveConfig', () => {
   it('returns the baked prod config', () => {
@@ -64,5 +64,22 @@ describe('parseEnvName', () => {
   });
   it('rejects staging', () => {
     expect(() => parseEnvName('staging')).toThrow();
+  });
+});
+
+describe('resolveOAuthScopes', () => {
+  it('requests offline_access so a refresh token is issued', () => {
+    expect(resolveOAuthScopes({ admin: false })).toContain('offline_access');
+  });
+
+  it('leaves admin scopes out by default', () => {
+    const scopes = resolveOAuthScopes({ admin: false });
+    for (const scope of ADMIN_OAUTH_SCOPES) expect(scopes).not.toContain(scope);
+  });
+
+  it('adds admin scopes on top of the defaults when admin is requested', () => {
+    const scopes = resolveOAuthScopes({ admin: true });
+    expect(scopes).toEqual([...resolveOAuthScopes({ admin: false }), ...ADMIN_OAUTH_SCOPES]);
+    expect(scopes).toContain('campaigns:publish');
   });
 });
