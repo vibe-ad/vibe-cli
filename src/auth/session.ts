@@ -23,13 +23,14 @@ function toStored(
     scope?: string;
     token_type: string;
   },
-  previousRefresh?: string,
+  previous?: StoredCredential,
 ): StoredCredential {
   return {
     accessToken: resp.access_token,
-    refreshToken: resp.refresh_token ?? previousRefresh,
+    refreshToken: resp.refresh_token ?? previous?.refreshToken,
     expiresAt: Date.now() + resp.expires_in * 1000,
-    scope: resp.scope,
+    // RFC 6749 §5.1: a refresh response may omit `scope` when it is unchanged.
+    scope: resp.scope ?? previous?.scope,
     tokenType: resp.token_type,
     clientId: config.oauthClientId,
     issuer: config.oauthIssuerUrl,
@@ -106,7 +107,7 @@ export async function getAccessToken(config: CliEnvConfig): Promise<string> {
   }
 
   const refreshed = await refreshAccessToken(config, cred.refreshToken);
-  const next = toStored(config, refreshed, cred.refreshToken);
+  const next = toStored(config, refreshed, cred);
   await saveCredential(config.name, next);
   return next.accessToken;
 }
