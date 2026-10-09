@@ -73,6 +73,22 @@ vibeco call <operationId> [--path-param value ...] [--query-param value ...] [--
   API, usage) are written to stderr as a structured envelope, with a
   non-zero exit code that distinguishes the failure mode.
 
+### Admin-only operations
+
+Some operations need a scope that only organization admins can grant
+(currently `campaigns:publish`, used by `publish-campaign`). A plain
+`vibeco login` leaves it out, because asking for it as a non-admin makes the
+whole consent fail. Organization admins log in with:
+
+```sh
+vibeco login --admin
+```
+
+`vibeco operations` and `vibeco describe` flag these operations with
+`"callRequiresAdminLogin": true`. Calling one without the admin scope fails before
+any request is sent, with an `admin_login_required` error that says to run
+`vibeco login --admin`.
+
 ### Environments
 
 The CLI ships with the `prod` endpoint baked into `src/config.ts` and hits it
@@ -107,6 +123,7 @@ revision (recorded in [`openapi/manifest.json`](./openapi/manifest.json)) and
 generates a runtime registry under `src/generated/`.
 
 [vibe-api]: https://developers.vibe.co
+
 Contact: team-integration@vibe.co
 
 ## License

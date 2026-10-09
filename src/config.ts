@@ -28,6 +28,12 @@ export const OAUTH_SCOPES: readonly string[] = [
   'offline_access',
 ];
 
+export const ADMIN_OAUTH_SCOPES: readonly string[] = ['campaigns:publish'];
+
+export function resolveOAuthScopes(options: { admin: boolean }): readonly string[] {
+  return options.admin ? [...OAUTH_SCOPES, ...ADMIN_OAUTH_SCOPES] : OAUTH_SCOPES;
+}
+
 export interface CliEnvConfig {
   readonly name: EnvName;
   /** Base URL for the public API (e.g. https://api.vibe.co). */
