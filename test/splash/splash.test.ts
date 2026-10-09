@@ -126,7 +126,7 @@ describe('runSplash (animated)', () => {
     expect(rewinds).toBeGreaterThanOrEqual(2);
   });
 
-  it('ends with the static body: version, commands, and all 46 operationIds', async () => {
+  it('ends with the static body: version, commands, and every operationId', async () => {
     const fake = fakeIO();
     await runSplash(INPUT, fake.io);
     const out = fake.output();
@@ -151,7 +151,7 @@ describe('runSplash body structure', () => {
     const fake = fakeIO({ env: { CI: 'true' } });
     await runSplash(INPUT, fake.io);
     const out = fake.output();
-    for (const title of ['Usage', 'Options', 'Commands', 'API operations (46)']) {
+    for (const title of ['Usage', 'Options', 'Commands', `API operations (${OPERATIONS.length})`]) {
       expect(out).toMatch(new RegExp(`┌─+ ${title.replace(/[()]/g, '\\$&')} ─+┐`));
     }
     expect(out).toContain('vibeco <command> [options]');
@@ -169,6 +169,6 @@ describe('runSplash (static)', () => {
     expect(out).not.toContain('\x1b[');
     expect(fake.sleeps()).toBe(0);
     expect(out).toContain(INPUT.version);
-    expect(out).toContain('API operations (46)');
+    expect(out).toContain(`API operations (${OPERATIONS.length})`);
   });
 });
