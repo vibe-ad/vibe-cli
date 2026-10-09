@@ -1,3 +1,4 @@
+import { adminScopesRequiredBy } from '@/admin-login';
 import { OPERATIONS, SPEC_REVISION } from '@/generated/operations';
 import { EXIT, writeJson } from '@/output';
 
@@ -9,6 +10,7 @@ export function runListOperations(): number {
       operationId: op.operationId,
       summary: op.summary,
       scopes: op.scopes,
+      ...(adminScopesRequiredBy(op).length > 0 && { callRequiresAdminLogin: true }),
     })),
   });
   return EXIT.OK;

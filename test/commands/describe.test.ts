@@ -55,4 +55,16 @@ describe('runDescribe', () => {
     const payload = JSON.parse(stdout);
     expect(payload).not.toHaveProperty('body');
   });
+
+  it('flags operations that need `vibeco login --admin`', () => {
+    runDescribe('publish-campaign');
+    const payload = JSON.parse(stdout);
+    expect(payload.callRequiresAdminLogin).toBe(true);
+    expect(payload.auth).toContain('vibeco login --admin');
+  });
+
+  it('does not flag regular operations', () => {
+    runDescribe('list-advertisers');
+    expect(JSON.parse(stdout)).not.toHaveProperty('callRequiresAdminLogin');
+  });
 });

@@ -1,3 +1,4 @@
+import { adminScopesRequiredBy } from '@/admin-login';
 import { OPERATIONS_BY_ID } from '@/generated/operations';
 import { EXIT, writeError, writeJson } from '@/output';
 
@@ -33,6 +34,12 @@ export function runDescribe(operationId: string): number {
     scopes: operation.scopes,
     arguments: args,
   };
+
+  if (adminScopesRequiredBy(operation).length > 0) {
+    payload.callRequiresAdminLogin = true;
+    payload.auth =
+      'Organization admins only: requires a session opened with `vibeco login --admin`.';
+  }
 
   if (operation.body) {
     payload.body = {

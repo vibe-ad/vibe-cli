@@ -21,6 +21,7 @@ export function writeError(envelope: {
   kind?: string;
   status?: number;
   body?: unknown;
+  hint?: string;
 }): void {
   process.stderr.write(JSON.stringify(envelope, null, 2) + '\n');
 }

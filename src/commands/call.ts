@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 
-import { getAccessToken } from '@/auth/session';
+import { adminLoginHint, adminScopesRequiredBy, missingAdminScopes } from '@/admin-login';
+import { getAccessToken, getCurrentCredential } from '@/auth/session';
 import { resolveConfig, type EnvName } from '@/config';
 import { OPERATIONS_BY_ID } from '@/generated/operations';
 import { LATEST_REVISION } from '@/generated/manifest';
@@ -154,8 +155,14 @@ export async function runCall(options: CallOptions): Promise<number> {
   let qs: URLSearchParams;
   let headers: Record<string, string>;
   let bodyText: string | undefined;
+  let grantedScope: string | undefined;
   try {
     const accessToken = await getAccessToken(config);
+    grantedScope = (await getCurrentCredential(config))?.scope?.trim() || undefined;
+    if (missingAdminScopes(operation, grantedScope).length > 0) {
+      writeError({ kind: 'admin_login_required', message: adminLoginHint(operation) });
+      return EXIT.AUTH_ERROR;
+    }
     path = buildPath(operation, parsed.flags);
     qs = buildQuery(operation, parsed.flags);
     headers = buildHeaders(operation, parsed.flags, accessToken);
@@ -213,6 +220,12 @@ export async function runCall(options: CallOptions): Promise<number> {
       status: response.status,
       message: `${operation.method.toUpperCase()} ${operation.path} returned ${response.status}`,
       body: parsedBody,
+      hint:
+        response.status === 403 &&
+        grantedScope === undefined &&
+        adminScopesRequiredBy(operation).length > 0
+          ? adminLoginHint(operation)
+          : undefined,
     });
     return EXIT.API_ERROR;
   }

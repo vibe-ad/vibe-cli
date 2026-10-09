@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 
+import { ADMIN_OPERATION_IDS } from '@/admin-login';
 import { runCall } from '@/commands/call';
 import { runDescribe } from '@/commands/describe';
 import { runListOperations } from '@/commands/list-operations';
@@ -7,7 +8,7 @@ import { runLogin } from '@/commands/login';
 import { runLogout } from '@/commands/logout';
 import { runSchemas } from '@/commands/schemas';
 import { runWhoami } from '@/commands/whoami';
-import { parseEnvName, type EnvName } from '@/config';
+import { ADMIN_OAUTH_SCOPES, parseEnvName, type EnvName } from '@/config';
 import { LATEST_REVISION } from '@/generated/manifest';
 import { EXIT, writeError } from '@/output';
 import { runSplash, shouldShowSplash } from '@/splash/splash';
@@ -118,8 +119,13 @@ export function buildProgram(): Command {
 
   program
     .command('login')
-    .description('Authenticate against Vibe (OAuth 2.0 + PKCE, opens browser).')
-    .option('--admin', 'Also request admin-only scopes (requires an organization admin role).')
+    .description(
+      `Authenticate against Vibe (OAuth 2.0 + PKCE, opens browser). Organization admins add --admin to call ${ADMIN_OPERATION_IDS.join(', ')}.`,
+    )
+    .option(
+      '--admin',
+      `Also request the admin-only scopes (${ADMIN_OAUTH_SCOPES.join(', ')}). Organization admins only: for anyone else the consent is refused.`,
+    )
     .action(async (cmdOpts: { admin?: boolean }) => {
       const opts = program.opts<GlobalOpts>();
       await withExit(() => runLogin(envFromOpts(opts), { admin: cmdOpts.admin }));
